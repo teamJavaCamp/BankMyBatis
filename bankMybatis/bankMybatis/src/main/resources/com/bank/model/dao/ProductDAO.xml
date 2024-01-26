@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bank.model.dao.ProductDAO">
+
+    <resultMap id="productResultMap1" type="com.bank.model.dto.LoanDTO">
+        <id property="interestRate" column="interest_rate"/>
+        <result property="period" column="duration"></result>
+        <result property="loanAmount" column="loan_amount"></result>
+    </resultMap>
+
+    <resultMap id="productResultMap2" type="com.bank.model.dto.SavingsDTO">
+        <id property="interestRate" column="interest_rate"/>
+        <result property="period" column="duration"></result>
+        <result property="savingsAmount" column="savings_amount"></result>
+        <!--<result property="type" column="typee"></result>-->
+    </resultMap>
+
+    <select id="selectedSavingsProductInfo" parameterType="com.bank.model.dto.MemberDTO" resultMap="productResultMap2">
+        SELECT s.interest_rate
+               ,s.duration
+               ,s.savings_amount
+        FROM tbl_savings s
+        LEFT JOIN tbl_product p on s.product_id = p.product_id
+        WHERE p.id = #{ id }
+    </select>
+
+    <select id="selectedLoanProductInfo" parameterType="com.bank.model.dto.MemberDTO" resultMap="productResultMap1">
+        SELECT l.interest_rate
+             ,l.duration
+             ,l.loan_amount
+        FROM tbl_loan l
+        LEFT JOIN tbl_product p on l.product_id = p.product_id
+        WHERE p.id = #{ id }
+    </select>
+
+    <insert id="registNewSavingsProduct" parameterType="com.bank.model.dto.SavingsDTO">
+        INSERT INTO tbl_savings
+                (
+                 interest_rate
+                ,duration
+                ,savings_amount
+                )
+        VALUES (
+                #{ interestRate }
+                ,#{ period }
+                ,#{ savingsAmount }
+            )
+    </insert>
+
+
+
+    <insert id="registNewLoanProduct" parameterType="com.bank.model.dto.SavingsDTO">
+        SELECT loan_info.loan_amount
+             ,loan_info.interest_rate
+             ,loan_info.duration
+            FROM (
+                SELECT l.loan_amount
+                     , l.interest_rate
+                     , l.duration
+                    FROM tbl_loan l
+                JOIN tbl_product p ON l.product_id = p.product_id
+                 ) AS loan_info;
+
+        INSERT INTO loan_info(
+                             interest_rate
+                             ,duration
+                             ,loan_amount
+        )
+        VALUES(
+               #{ interestRate }
+               ,#{ period }
+               ,#{ loanAmount }
+              )
+    </insert>
+</mapper>
